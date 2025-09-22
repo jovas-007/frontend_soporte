@@ -1,0 +1,125 @@
+<section class="personajes-screen" aria-label="Galería de personajes DBZ">
+  <!-- Capa de carga -->
+  <app-loading-spinner *ngIf="isLoading"></app-loading-spinner>
+
+  <!-- Shell común -->
+  <app-navbar></app-navbar>
+  <app-sidenav></app-sidenav>
+
+  <main class="main-content" [class.hidden]="isLoading" role="main">
+    <app-page-header
+      [title]="'Personajes'"
+      [subtitle]="'Explora la galería oficial de personajes de DBZ'">
+    </app-page-header>
+
+   <!-- Barra superior -->
+<section class="toolbar" aria-label="Controles de listado" *ngIf="!isLoading">
+  <div class="toolbar-row">
+    <div class="orden-wrapper">
+      <label class="toolbar-label" for="ordenSelectMat">Ordenar por:</label>
+
+      <mat-form-field appearance="outline" class="orden-mat-field" #ordenAnchor>
+        <mat-select
+          id="ordenSelectMat"
+          [value]="ordenActual"
+          (selectionChange)="onOrdenChange($event.value)"
+          panelClass="orden-panel"
+          [panelWidth]="panelWidth"
+          aria-label="Ordenar por">
+          <mat-option value="nombre_asc">Nombre (A–Z)</mat-option>
+          <mat-option value="nombre_desc">Nombre (Z–A)</mat-option>
+          <mat-option value="ki_asc">Base KI (Asc.)</mat-option>
+          <mat-option value="ki_desc">Base KI (Desc.)</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <button mat-raised-button class="pill-btn" (click)="agregar()">
+      <!-- si tienes MatIconModule, puedes añadir:
+      <mat-icon>add</mat-icon> -->
+      Agregar personaje
+    </button>
+  </div>
+</section>
+
+
+    <!-- Formulario alta/edición 
+    <section *ngIf="mostrarForm" class="mt-4" aria-label="Formulario de personaje">
+      <app-personaje-form
+        [personaje]="personajeEnEdicion"
+        (guardado)="guardado($event)"
+        (cancelado)="cancelar()">
+      </app-personaje-form>
+    </section>
+-->
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="!isLoading && (!personajes || personajes.length === 0)">
+      <p>No se encontraron personajes para mostrar.</p>
+    </div>
+
+    <!-- Galería paginada -->
+    <div class="cards-grid" *ngIf="!isLoading && personajesPagina && personajesPagina.length">
+      <article class="card"
+               *ngFor="let p of personajesPagina; trackBy: trackById"
+               aria-label="Ficha de personaje">
+        <!-- Imagen -->
+        <div class="image-container" aria-hidden="true">
+          <img class="character-image"
+               [src]="imagenDe(p) || 'assets/placeholder-dbz.png'"
+               [alt]="p.nombre"
+               [attr.title]="p.nombre"
+               (error)="onImgError($event)"
+               loading="lazy"
+               decoding="async">
+        </div>
+
+        <!-- Contenido -->
+        <div class="card-body">
+          <h3 class="character-name">{{ p.nombre }}</h3>
+
+          <ul class="character-details" aria-label="Detalles">
+            <li><strong>Especie:</strong>   <span class="value">{{ p.especie }}</span></li>
+            <li><strong>Género:</strong>    <span class="value">{{ p.genero }}</span></li>
+            <li><strong>Base KI:</strong>    <span class="value">{{ p.base_ki }}</span></li>
+            <li><strong>Total KI:</strong>   <span class="value">{{ p.total_ki }}</span></li>
+            <li><strong>Afiliación:</strong> <span class="value">{{ p.afiliacion }}</span></li>
+          </ul>
+
+          <p class="description"
+             [id]="'desc-' + p.id"
+             [class.collapsed]="!isExpanded(p.id!)">
+            {{ p.descripcion }}
+          </p>
+
+          <div class="actions-row">
+            <button type="button"
+                    class="toggle-btn"
+                    [attr.aria-controls]="'desc-' + p.id"
+                    [attr.aria-expanded]="isExpanded(p.id!)"
+                    (click)="toggleDescripcion(p.id!)">
+              {{ isExpanded(p.id!) ? 'Mostrar menos' : 'Mostrar más información…' }}
+            </button>
+
+            <span class="spacer"></span>
+
+            <button mat-stroked-button color="primary" (click)="editar(p)">Editar</button>
+            <button mat-stroked-button color="warn" (click)="eliminar(p.id!, p.nombre)">Eliminar</button>
+
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Paginación -->
+    <mat-paginator
+      *ngIf="!isLoading && totalFiltrados > 0"
+      [length]="totalFiltrados"
+      [pageSize]="tamPagina"
+      [pageIndex]="paginaActual"
+      [pageSizeOptions]="[8, 12, 16, 24]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  </main>
+
+  <app-footer></app-footer>
+</section>
